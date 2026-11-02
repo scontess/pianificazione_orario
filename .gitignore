@@ -1,8 +1,0 @@
-dump.sql
-genera_dump.py
-migra_check_db.py
-migra.py
-.gitignore
-.env
-venv/
-"templates/turso acces token"
