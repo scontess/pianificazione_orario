@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pannello Gestione - Orario Scolastico</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            text-align: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 18px;
+            font-weight: bold;
+            border-radius: 20px;
+            border: 1px solid #cbd5e1;
+            background-color: #f1f5f9;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-btn:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
+
+        .local-search {
+            padding: 6px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            width: 240px;
+            outline: none;
+            background-color: #f8fafc;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 7px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            outline: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .form-group button {
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        #tab-classi .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #tab-classi .form-group input[type="text"] {
+            width: 140px !important;
+            max-width: 140px !important;
+            flex: 0 0 auto !important;
+        }
+
+        #tab-classi .form-group button {
+            flex-shrink: 0 !important;
+        }
+      
+        .btn-rounded {
+            padding: 8px 18px;
+            border-radius: 25px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary-rounded {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-primary-rounded:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning-rounded {
+            background-color: #f59e0b;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+            transition: all 0.2s ease;
+            margin-right: 4px;
+        }
+
+        .btn-warning-rounded:hover {
+            background-color: #d97706;
+        }
+
+        .btn-back-rounded {
+            background-color: #64748b;
+            color: white;
+            margin-bottom: 15px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-back-rounded:hover {
+            background-color: #475569;
+        }
+
+        .btn-danger-rounded {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger-rounded:hover {
+            background-color: #dc2626;
+        }
+
+        .table-container {
+            max-height: 480px;
+            overflow-y: auto;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="text-align: center;">
+        <a href="/" class="btn-rounded btn-back-rounded">⬅️ Torna alla Vista Orario</a>
+    </div>
+
+    <h1>⚙️ Pannello Gestione Scuola</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'professori')">👨‍🏫 Professori</button>
+        <button class="tab-btn" onclick="openTab(event, 'materie')">📚 Materie</button>
+        <button class="tab-btn" onclick="openTab(event, 'classi')">🏫 Classi</button>
+        <button class="tab-btn" onclick="openTab(event, 'associazioni')">🔗 Associazioni</button>
+        <button class="tab-btn" onclick="openTab(event, 'vincoli')">🔒 Vincoli Prof</button>
+        <button class="tab-btn" onclick="openTab(event, 'vincoliclassi')">🏫 Vincoli Classi</button>
+        <button class="tab-btn" onclick="openTab(event, 'import')">🔗 Importa Master</button>
+    </div>
+
+    <!-- TAB 1: PROFESSORI -->
+    <div id="tab-professori" class="tab-content" style="display: block;">
+        <div class="section-header">
+            <h2>Gestione Professori</h2>
+            <input type="text" class="local-search" placeholder="🔍 Cerca professore..."
+                onkeyup="filtraTabella(this, 'table-professori')">
+        </div>
+        <div class="form-group">
+            <input type="hidden" id="prof-id">
+            <input type="text" id="prof-nome" placeholder="Nome">
+            <input type="text" id="prof-cognome" placeholder="Cognome">
+            <input type="text" id="prof-note" placeholder="Note / Specializzazione">
+            <button id="btn-salva-prof" onclick="salvaProfessore()" class="btn-rounded btn-primary-rounded">➕ Aggiungi</button>
+            <button id="btn-annulla-prof" onclick="resetProfessore()" class="btn-rounded"
+                style="background:#cbd5e1; color:#334155; display:none;">Annulla</button>
+        </div>
+        <div class="table-container">
+            <table id="table-professori">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cognome</th>
+                        <th>Nome</th>
+                        <th>Note</th>
+                        <th>Ore Tot.</th>
+                        <th>Ore Res.</th>
+                        <th>Fuori Cattedra</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 2: MATERIE -->
+    <div id="tab-materie" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <h2>Gestione Materie</h2>
+            <input type="text" class="local-search" placeholder="🔍 Cerca materia..."
+                onkeyup="filtraTabella(this, 'table-materie')">
+        </div>
+        <div class="form-group">
+            <input type="hidden" id="mat-id">
+            <input type="text" id="mat-nome" placeholder="Nome Materia">
+            <button id="btn-salva-mat" onclick="salvaMateria()" class="btn-rounded btn-primary-rounded">➕ Aggiungi</button>
+            <button id="btn-annulla-mat" onclick="resetMateria()" class="btn-rounded"
+                style="background:#cbd5e1; color:#334155; display:none;">Annulla</button>
+        </div>
+        <div class="table-container">
+            <table id="table-materie">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome Materia</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 3: CLASSI -->
+    <div id="tab-classi" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <h2>Gestione Classi</h2>
+            <input type="text" id="search-classi" name="ricerca_classi" autocomplete="on" class="local-search"
+                placeholder="🔍 Cerca classe..." onkeyup="filtraTabella(this, 'table-classi')">
+        </div>
+
+        <div class="form-group">
+            <input type="hidden" id="cls-id">
+            <input type="text" id="cls-nome" name="nome_classe" autocomplete="on" placeholder="Nome Classe">
+            <input type="text" id="cls-anno" name="anno_classe" autocomplete="on" placeholder="Descrizione">
+            <button id="btn-salva-cls" onclick="salvaClasse()" class="btn-rounded btn-primary-rounded">➕ Aggiungi</button>
+            <button id="btn-annulla-cls" onclick="resetClasse()" class="btn-rounded"
+                style="background:#cbd5e1; color:#334155; display:none;">Annulla</button>
+        </div>
+
+        <div class="table-container">
+            <table id="table-classi">
+                <thead>
+                    <tr>
+                        <th style="width: 80px; text-align: center;">Visibile</th>
+                        <th style="width: 80px;">ID</th>
+                        <th>Nome Classe</th>
+                        <th>Descrizione</th>
+                        <th style="width: 220px; text-align: center;">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-classi"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 4: ASSOCIAZIONI -->
+    <div id="tab-associazioni" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <h2>Associa Professore a Classe e Materia</h2>
+            <input type="text" class="local-search" placeholder="🔍 Cerca associazione..."
+                onkeyup="filtraTabella(this, 'table-associazioni')">
+        </div>
+        <div class="form-group">
+            <select id="assoc-prof">
+                <option value="" disabled selected>👤 Seleziona professore...</option>
+            </select>
+            <select id="assoc-materia">
+                <option value="" disabled selected>📚 Seleziona materia...</option>
+            </select>
+            <select id="assoc-classe">
+                <option value="" disabled selected>🏫 Seleziona classe...</option>
+            </select>
+            <input type="number" id="assoc-ore" placeholder="Ore" min="1" max="10" style="width: 70px;">
+            <select id="assoc-priorita">
+                <option value="" disabled selected>⭐ Priorità...</option>
+                <option value="1">P1 (Alta)</option>
+                <option value="2">P2 (Media)</option>
+                <option value="3">P3 (Bassa)</option>
+            </select>
+            <button onclick="salvaAssociazione()" class="btn-rounded btn-primary-rounded">🔗 Crea</button>
+        </div>
+        <div class="table-container">
+            <table id="table-associazioni">
+                <thead>
+                    <tr>
+                        <th>Professore</th>
+                        <th>Materia</th>
+                        <th>Classe</th>
+                        <th>Ore Totali</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 5: VINCOLI PROFESSORI -->
+    <div id="tab-vincoli" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <h2>Gestione Vincoli Professori</h2>
+            <input type="text" class="local-search" placeholder="🔍 Cerca vincolo..."
+                onkeyup="filtraTabella(this, 'table-vincoli')">
+        </div>
+        <div class="form-group">
+            <select id="vincolo-prof">
+                <option value="" disabled selected>👤 Seleziona professore...</option>
+            </select>
+            <select id="vincolo-giorno">
+                <option value="" disabled selected>📅 Giorno...</option>
+                <option value="lun">Lunedì</option>
+                <option value="mar">Martedì</option>
+                <option value="mer">Mercoledì</option>
+                <option value="gio">Giovedì</option>
+                <option value="ven">Venerdì</option>
+                <option value="sab">Sabato</option>
+            </select>
+            <select id="vincolo-ora">
+                <option value="" disabled selected>🕒 Ora...</option>
+                <option value="0">📅 Intera Giornata</option>
+                <option value="1">1° Ora</option>
+                <option value="2">2° Ora</option>
+                <option value="3">3° Ora</option>
+                <option value="4">4° Ora</option>
+                <option value="5">5° Ora</option>
+                <option value="6">6° Ora</option>
+            </select>
+            <select id="vincolo-tipo">
+                <option value="" disabled selected>⚡ Tipo vincolo...</option>
+                <option value="assenza">Assenza</option>
+                <option value="preferenza">Preferenza</option>
+                <option value="obbligo">Obbligo</option>
+            </select>
+            <button onclick="salvaVincolo()" class="btn-rounded btn-primary-rounded">➕ Aggiungi</button>
+        </div>
+        <div class="table-container">
+            <table id="table-vincoli">
+                <thead>
+                    <tr>
+                        <th>Professore</th>
+                        <th>Giorno</th>
+                        <th>Ora</th>
+                        <th>Tipo Vincolo</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 6: VINCOLI CLASSI -->
+    <div id="tab-vincoliclassi" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <h2>Gestione Vincoli / Chiusure Classi</h2>
+            <input type="text" class="local-search" placeholder="🔍 Cerca vincolo classe..."
+                onkeyup="filtraTabella(this, 'table-vincoliclassi')">
+        </div>
+        <div class="form-group">
+            <select id="vincolo-classe-select">
+                <option value="" disabled selected>🏫 Seleziona classe...</option>
+            </select>
+            <select id="vincolo-classe-giorno">
+                <option value="" disabled selected>📅 Giorno...</option>
+                <option value="lun">Lunedì</option>
+                <option value="mar">Martedì</option>
+                <option value="mer">Mercoledì</option>
+                <option value="gio">Giovedì</option>
+                <option value="ven">Venerdì</option>
+                <option value="sab">Sabato</option>
+            </select>
+            <select id="vincolo-classe-ora">
+                <option value="" disabled selected>🕒 Ora...</option>
+                <option value="0">📅 Intera Giornata</option>
+                <option value="1">1° Ora</option>
+                <option value="2">2° Ora</option>
+                <option value="3">3° Ora</option>
+                <option value="4">4° Ora</option>
+                <option value="5">5° Ora</option>
+                <option value="6">6° Ora</option>
+            </select>
+            <button onclick="salvaVincoloClasse()" class="btn-rounded btn-primary-rounded">➕ Aggiungi Vincolo</button>
+        </div>
+        <div class="table-container">
+            <table id="table-vincoliclassi">
+                <thead>
+                    <tr>
+                        <th>Classe</th>
+                        <th>Giorno</th>
+                        <th>Ora</th>
+                        <th>Tipo Vincolo</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 7: IMPORTAZIONE MASTER CSV -->
+    <div id="tab-import" class="tab-content" style="display: none;">
+        <div class="section-header">
+            <h2>Caricamento Master Iniziale (CSV)</h2>
+        </div>
+        <p class="text-muted" style="font-size: 0.9rem;">Seleziona il file CSV master per popolare classi, cattedre e vincoli in modo incrementale.</p>
+        <div class="card p-4 mt-3 bg-white shadow-sm rounded" style="max-width: 600px; margin: 0 auto;">
+            <form id="formImportMaster" enctype="multipart/form-data">
+                <div class="mb-3" style="margin-bottom: 15px;">
+                    <label for="file_csv" class="form-label font-weight-bold">File CSV Master:</label>
+                    <input type="file" class="form-control" id="file_csv" name="file_csv" accept=".csv" required
+                        style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%;">
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="background-color: #2563eb; color: white; padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="fas fa-upload"></i> Carica Dati nel Database
+                </button>
+            </form>
+            <div id="importResult" class="mt-3"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('formImportMaster').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('importResult');
+            resultDiv.innerHTML = '<div class="alert alert-info">Caricamento in corso...</div>';
+
+            try {
+                const response = await fetch('/admin/import_master', { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">Errore: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Errore di connessione al server.</div>`;
+            }
+        });
+
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            const targetTab = document.getElementById('tab-' + tabName);
+            if (targetTab) targetTab.style.display = 'block';
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+            document.querySelectorAll('.local-search').forEach(input => input.value = '');
+            if (typeof caricaDatiAdmin === 'function') caricaDatiAdmin();
+        }
+
+        let mappaFuoriCattedraAdmin = {};
+
+        async function caricaDatiAdmin() {
+            try {
+                const [resProf, resMat, resCls, resPcm, resVincoli, resVincoliClassi, resOrario, resFuoriCattedra] = await Promise.all([
+                    fetch('/professori/lista').then(res => res.json()),
+                    fetch('/materie').then(res => res.json()),
+                    fetch('/classi').then(res => res.json()),
+                    fetch('/profclassemateria/lista').then(res => res.json()),
+                    fetch('/vincoliprof/lista').then(res => res.json()),
+                    fetch('/vincoliclassi/lista').then(res => res.json()),
+                    fetch('/orario').then(res => res.json()),
+                    fetch('/admin/ore-fuori-cattedra').then(res => res.json())
+                ]);
+
+                mappaFuoriCattedraAdmin = resFuoriCattedra;
+
+                const oreTotaliProf = {};
+                resPcm.forEach(item => {
+                    if (!oreTotaliProf[item.profid]) oreTotaliProf[item.profid] = 0;
+                    oreTotaliProf[item.profid] += (item.oresettimanali_totali || 0);
+                });
+
+                const orePiazzateProf = {};
+                resOrario.forEach(o => {
+                    if (!orePiazzateProf[o.profid]) orePiazzateProf[o.profid] = 0;
+                    orePiazzateProf[o.profid] += 1;
+                });
+
+                document.querySelector('#table-professori tbody').innerHTML = resProf.slice().reverse().map(p => {
+                    const totale = oreTotaliProf[p.id] || 0;
+                    const piazzate = orePiazzateProf[p.id] || 0;
+                    const fuoriCattedra = mappaFuoriCattedraAdmin[p.id] || mappaFuoriCattedraAdmin[String(p.id)] || 0;
+                    const piazzateRegolari = Math.max(0, piazzate - fuoriCattedra);
+                    const residue = totale - piazzateRegolari;
+                    const isZero = totale === 0;
+
+                    return `
+                        <tr>
+                            <td>${p.id}</td>
+                            <td>${p.cognome}</td>
+                            <td>${p.nome}</td>
+                            <td>${p.note || ''}</td>
+                            <td style="text-align: center; font-weight: bold;">${totale}h</td>
+                            <td style="text-align: center; ${isZero ? 'color: #dc2626; font-weight: bold;' : ''}">${residue}h</td>
+                            <td style="text-align: center; font-weight: bold; color: ${fuoriCattedra > 0 ? '#2563eb' : '#64748b'};">${fuoriCattedra}h</td>
+                            <td>
+                                <button onclick="preparaModificaProf(${p.id}, '${p.nome}', '${p.cognome}', '${p.note || ''}')" class="btn-warning-rounded">✏️ Modifica</button>
+                                <button onclick="eliminaProfessore(${p.id})" class="btn-danger-rounded">🗑️ Elimina</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const optionsProfs = `<option value="" disabled selected>👤 Seleziona professore...</option>` +
+                    resProf.map(p => `<option value="${p.id}">${p.cognome} ${p.nome}</option>`).join('');
+                document.getElementById('assoc-prof').innerHTML = optionsProfs;
+                document.getElementById('vincolo-prof').innerHTML = optionsProfs;
+
+                document.querySelector('#table-materie tbody').innerHTML = resMat.slice().reverse().map(m => `
+                    <tr>
+                        <td>${m.id}</td>
+                        <td>${m.nome}</td>
+                        <td>
+                            <button onclick="preparaModificaMat(${m.id}, '${m.nome}')" class="btn-warning-rounded">✏️ Modifica</button>
+                            <button onclick="eliminaMateria(${m.id})" class="btn-danger-rounded">🗑️ Elimina</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                const optionsMat = `<option value="" disabled selected>📚 Seleziona materia...</option>` +
+                    resMat.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+                document.getElementById('assoc-materia').innerHTML = optionsMat;
+
+                const tbodyClassi = document.getElementById('tbody-classi');
+                tbodyClassi.innerHTML = resCls.slice().reverse().map(c => {
+                    const isChecked = (c.visibile === 1 || c.visibile === true);
+                    return `
+                        <tr>
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="toggle-visibilita-classe" data-classe-id="${c.id}" ${isChecked ? 'checked' : ''} onchange="gestisciVisibilitaClasseServer(this)">
+                            </td>
+                            <td>${c.id}</td>
+                            <td>${c.nome}</td>
+                            <td>${c.anno || ''}</td>
+                            <td>
+                                <button onclick="preparaModificaCls(${c.id}, '${c.nome}', '${c.anno || ''}')" class="btn-warning-rounded">✏️ Modifica</button>
+                                <button onclick="eliminaClasse(${c.id})" class="btn-danger-rounded">🗑️ Elimina</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const optionsCls = `<option value="" disabled selected>🏫 Seleziona classe...</option>` +
+                    resCls.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+                document.getElementById('assoc-classe').innerHTML = optionsCls;
+                document.getElementById('vincolo-classe-select').innerHTML = optionsCls;
+
+                document.querySelector('#table-associazioni tbody').innerHTML = resPcm.slice().reverse().map(item => `
+                    <tr>
+                        <td>${item.prof_cognome} ${item.prof_nome}</td>
+                        <td>${item.materia_nome}</td>
+                        <td>${item.classe_nome}</td>
+                        <td>${item.oresettimanali_totali}</td>
+                        <td><button onclick="eliminaAssociazione(${item.id})" class="btn-danger-rounded">🗑️ Rimuovi</button></td>
+                    </tr>
+                `).join('');
+
+                document.querySelector('#table-vincoli tbody').innerHTML = resVincoli.slice().reverse().map(v => `
+                    <tr>
+                        <td>${v.prof_cognome} ${v.prof_nome}</td>
+                        <td>${v.giorno}</td>
+                        <td>${v.ora}° ora</td>
+                        <td>${v.tipo_vincolo}</td>
+                        <td><button onclick="eliminaVincolo(${v.id})" class="btn-danger-rounded">🗑️ Elimina</button></td>
+                    </tr>
+                `).join('');
+
+                document.querySelector('#table-vincoliclassi tbody').innerHTML = resVincoliClassi.slice().reverse().map(v => `
+                    <tr>
+                        <td>${v.classe_nome}</td>
+                        <td>${v.giorno}</td>
+                        <td>${v.ora}° ora</td>
+                        <td>${v.tipo_vincolo}</td>
+                        <td><button onclick="eliminaVincoloClasse(${v.id})" class="btn-danger-rounded">🗑️ Elimina</button></td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error("Errore nel caricamento dati admin:", error);
+            }
+        }
+
+        async function gestisciVisibilitaClasseServer(checkbox) {
+            const classeId = checkbox.getAttribute('data-classe-id');
+            const isVisibile = checkbox.checked;
+            try {
+                await fetch(`/classi/${classeId}/visibilita`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visibile: isVisibile })
+                });
+            } catch (error) {
+                console.error("Errore di rete:", error);
+                checkbox.checked = !isVisibile;
+            }
+        }
+
+        async function salvaVincoloClasse() {
+            const classeid = document.getElementById('vincolo-classe-select').value;
+            const giorno = document.getElementById('vincolo-classe-giorno').value;
+            const oraSelezionata = document.getElementById('vincolo-classe-ora').value;
+
+            if (!classeid || !giorno || oraSelezionata === "") {
+                return alert("Compila tutti i campi!");
+            }
+
+            const oreDaSalvare = oraSelezionata === "0" ? [1, 2, 3, 4, 5, 6] : [parseInt(oraSelezionata)];
+
+            try {
+                for (const ora of oreDaSalvare) {
+                    await fetch('/vincoliclassi', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            classeid: parseInt(classeid),
+                            giorno,
+                            ora: ora,
+                            tipo_vincolo: "assenza"
+                        })
+                    });
+                }
+                caricaDatiAdmin();
+                alert("Vincolo classe salvato con successo!");
+            } catch (err) {
+                console.error("Errore:", err);
+            }
+        }
+
+        async function eliminaVincoloClasse(id) {
+            if (confirm("Rimuovere questo vincolo per la classe?")) {
+                await fetch('/vincoliclassi/' + id, { method: 'DELETE' });
+                caricaDatiAdmin();
+            }
+        }
+
+        function preparaModificaProf(id, nome, cognome, note) {
+            document.getElementById('prof-id').value = id;
+            document.getElementById('prof-nome').value = nome;
+            document.getElementById('prof-cognome').value = cognome;
+            document.getElementById('prof-note').value = note;
+            document.getElementById('btn-salva-prof').innerText = "💾 Salva";
+            document.getElementById('btn-annulla-prof').style.display = "inline-block";
+        }
+
+        function resetProfessore() {
+            document.getElementById('prof-id').value = "";
+            document.getElementById('prof-nome').value = "";
+            document.getElementById('prof-cognome').value = "";
+            document.getElementById('prof-note').value = "";
+            document.getElementById('btn-salva-prof').innerText = "➕ Aggiungi";
+            document.getElementById('btn-annulla-prof').style.display = "none";
+        }
+
+        async function salvaProfessore() {
+            const id = document.getElementById('prof-id').value;
+            const nome = document.getElementById('prof-nome').value;
+            const cognome = document.getElementById('prof-cognome').value;
+            const note = document.getElementById('prof-note').value;
+            if (!nome || !cognome) return alert("Inserisci Nome e Cognome!");
+
+            if (id) {
+                await fetch('/professori/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, cognome, note }) });
+            } else {
+                await fetch('/professori', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, cognome, note }) });
+            }
+            resetProfessore();
+            caricaDatiAdmin();
+        }
+
+        async function eliminaProfessore(id) {
+            if (confirm("Eliminare il professore?")) { await fetch('/professori/' + id, { method: 'DELETE' }); caricaDatiAdmin(); }
+        }
+
+        function preparaModificaMat(id, nome) {
+            document.getElementById('mat-id').value = id;
+            document.getElementById('mat-nome').value = nome;
+            document.getElementById('btn-salva-mat').innerText = "💾 Salva";
+            document.getElementById('btn-annulla-mat').style.display = "inline-block";
+        }
+
+        function resetMateria() {
+            document.getElementById('mat-id').value = "";
+            document.getElementById('mat-nome').value = "";
+            document.getElementById('btn-salva-mat').innerText = "➕ Aggiungi";
+            document.getElementById('btn-annulla-mat').style.display = "none";
+        }
+
+        async function salvaMateria() {
+            const id = document.getElementById('mat-id').value;
+            const nome = document.getElementById('mat-nome').value;
+            if (!nome) return alert("Inserisci il nome!");
+            if (id) {
+                await fetch('/materie/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome }) });
+            } else {
+                await fetch('/materie', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome }) });
+            }
+            resetMateria();
+            caricaDatiAdmin();
+        }
+
+        async function eliminaMateria(id) {
+            if (confirm("Eliminare la materia?")) { await fetch('/materie/' + id, { method: 'DELETE' }); caricaDatiAdmin(); }
+        }
+
+        function preparaModificaCls(id, nome, anno) {
+            document.getElementById('cls-id').value = id;
+            document.getElementById('cls-nome').value = nome;
+            document.getElementById('cls-anno').value = anno;
+            document.getElementById('btn-salva-cls').innerText = "💾 Salva";
+            document.getElementById('btn-annulla-cls').style.display = "inline-block";
+        }
+
+        function resetClasse() {
+            document.getElementById('cls-id').value = "";
+            document.getElementById('cls-nome').value = "";
+            document.getElementById('cls-anno').value = "";
+            document.getElementById('btn-salva-cls').innerText = "➕ Aggiungi";
+            document.getElementById('btn-annulla-cls').style.display = "none";
+        }
+
+        async function salvaClasse() {
+            const id = document.getElementById('cls-id').value;
+            const nome = document.getElementById('cls-nome').value;
+            const anno = document.getElementById('cls-anno').value;
+            if (!nome) return alert("Inserisci la classe!");
+            if (id) {
+                await fetch('/classi/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, anno }) });
+            } else {
+                await fetch('/classi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, anno }) });
+            }
+            resetClasse();
+            caricaDatiAdmin();
+        }
+
+        async function eliminaClasse(id) {
+            if (confirm("Eliminare la classe?")) { await fetch('/classi/' + id, { method: 'DELETE' }); caricaDatiAdmin(); }
+        }
+
+        async function salvaAssociazione() {
+            const profid = document.getElementById('assoc-prof').value;
+            const materiaid = document.getElementById('assoc-materia').value;
+            const classeid = document.getElementById('assoc-classe').value;
+            const ore = document.getElementById('assoc-ore').value;
+            const prioritaVal = document.getElementById('assoc-priorita').value;
+
+            if (!profid || !materiaid || !classeid || !ore || !prioritaVal) {
+                alert("Compila tutti i campi, compresa la priorità!");
+                return;
+            }
+
+            await fetch('/profclassemateria', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profid, materiaid, classeid, oresettimanali_totali: ore, priorita: parseInt(prioritaVal, 10) })
+            });
+            caricaDatiAdmin();
+            document.getElementById('assoc-ore').value = "";
+            document.getElementById('assoc-priorita').value = "";
+        }
+
+        async function eliminaAssociazione(id) {
+            if (confirm("Rimuovere l'associazione?")) { await fetch('/profclassemateria/' + id, { method: 'DELETE' }); caricaDatiAdmin(); }
+        }
+
+        async function salvaVincolo() {
+            const profid = document.getElementById('vincolo-prof').value;
+            const giorno = document.getElementById('vincolo-giorno').value;
+            const oraSelezionata = document.getElementById('vincolo-ora').value;
+            const tipo_vincolo = document.getElementById('vincolo-tipo').value;
+
+            if (!oraSelezionata && oraSelezionata !== "0") return alert("Inserisci l'ora del vincolo!");
+
+            const oreDaSalvare = (oraSelezionata === "0" || oraSelezionata === "ALL") ? [1, 2, 3, 4, 5, 6] : [parseInt(oraSelezionata)];
+
+            try {
+                for (const ora of oreDaSalvare) {
+                    await fetch('/vincoliprof', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ profid: parseInt(profid), giorno, ora: ora, tipo_vincolo })
+                    });
+                }
+                caricaDatiAdmin();
+                alert("Vincolo salvato con successo!");
+            } catch (err) {
+                console.error("Errore:", err);
+            }
+        }
+
+        async function eliminaVincolo(id) {
+            if (confirm("Rimuovere questo vincolo?")) {
+                await fetch('/vincoliprof/' + id, { method: 'DELETE' });
+                caricaDatiAdmin();
+            }
+        }
+
+        function filtraTabella(inputEl, tableId) {
+            const filter = inputEl.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const trs = table.getElementsByTagName('tr');
+            for (let i = 1; i < trs.length; i++) {
+                const tr = trs[i];
+                const tds = tr.getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < tds.length; j++) {
+                    const td = tds[j];
+                    if (td && (td.textContent || td.innerText).toLowerCase().indexOf(filter) > -1) {
+                        match = true;
+                        break;
+                    }
+                }
+                tr.style.display = match ? "" : "none";
+            }
+        }
+
+        caricaDatiAdmin();
+    </script>
+</body>
+
+</html>
